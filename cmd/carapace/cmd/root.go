@@ -103,48 +103,6 @@ var rootCmd = &cobra.Command{
 					fmt.Fprintln(cmd.ErrOrStderr(), err.Error())
 				}
 			}
-		case "_carapace":
-			shell := ps.DetermineShell()
-			if len(args) > 1 {
-				shell = args[1]
-			}
-			if len(args) <= 2 {
-				if err := shim.Update(); err != nil {
-					fmt.Fprintln(cmd.ErrOrStderr(), err.Error()) // TODO fail / exit 1 ?
-				}
-
-				if err := updateSchema(); err != nil { // TODO do this only if needed
-					fmt.Fprintln(cmd.ErrOrStderr(), err.Error())
-				}
-
-				if err := createOverlayDir(); err != nil { // TODO do this only if needed
-					fmt.Fprintln(cmd.ErrOrStderr(), err.Error())
-				}
-			}
-			switch shell {
-			case "bash":
-				fmt.Fprintln(cmd.OutOrStdout(), bash_lazy(completers.Names()))
-			case "bash-ble":
-				fmt.Fprintln(cmd.OutOrStdout(), bash_ble_lazy(completers.Names()))
-			case "elvish":
-				fmt.Fprintln(cmd.OutOrStdout(), elvish_lazy(completers.Names()))
-			case "fish":
-				fmt.Fprintln(cmd.OutOrStdout(), fish_lazy(completers.Names()))
-			case "nushell":
-				fmt.Fprintln(cmd.OutOrStdout(), nushell_lazy(completers.Names()))
-			case "oil":
-				fmt.Fprintln(cmd.OutOrStdout(), oil_lazy(completers.Names()))
-			case "powershell":
-				fmt.Fprintln(cmd.OutOrStdout(), powershell_lazy(completers.Names()))
-			case "tcsh":
-				fmt.Fprintln(cmd.OutOrStdout(), tcsh_lazy(completers.Names()))
-			case "xonsh":
-				fmt.Fprintln(cmd.OutOrStdout(), xonsh_lazy(completers.Names()))
-			case "zsh":
-				fmt.Fprintln(cmd.OutOrStdout(), zsh_lazy(completers.Names()))
-			default:
-				fmt.Fprintln(os.Stderr, "could not determine shell")
-			}
 		default:
 			if overlayPath, err := overlayPath(args[0]); err == nil && len(args) > 2 { // and arg[1] is a known shell
 				cmd := &cobra.Command{
@@ -409,4 +367,54 @@ func init() {
 	for m, f := range macros {
 		spec.AddMacro(m, f)
 	}
+
+	carapace.Gen(rootCmd)
+
+	cmd, _, _ := rootCmd.Find([]string{"_carapace"}) // TODO handle err
+	cmd.Run = func(cmd *cobra.Command, args []string) {
+		// override _carapace Run function
+		shell := ps.DetermineShell()
+		if len(args) > 1 {
+			shell = args[1]
+		}
+		if len(args) <= 2 {
+			if err := shim.Update(); err != nil {
+				fmt.Fprintln(cmd.ErrOrStderr(), err.Error()) // TODO fail / exit 1 ?
+			}
+
+			if err := updateSchema(); err != nil { // TODO do this only if needed
+				fmt.Fprintln(cmd.ErrOrStderr(), err.Error())
+			}
+
+			if err := createOverlayDir(); err != nil { // TODO do this only if needed
+				fmt.Fprintln(cmd.ErrOrStderr(), err.Error())
+			}
+		}
+		switch shell {
+		case "bash":
+			fmt.Fprintln(cmd.OutOrStdout(), bash_lazy(completers.Names()))
+		case "bash-ble":
+			fmt.Fprintln(cmd.OutOrStdout(), bash_ble_lazy(completers.Names()))
+		case "elvish":
+			fmt.Fprintln(cmd.OutOrStdout(), elvish_lazy(completers.Names()))
+		case "fish":
+			fmt.Fprintln(cmd.OutOrStdout(), fish_lazy(completers.Names()))
+		case "nushell":
+			fmt.Fprintln(cmd.OutOrStdout(), nushell_lazy(completers.Names()))
+		case "oil":
+			fmt.Fprintln(cmd.OutOrStdout(), oil_lazy(completers.Names()))
+		case "powershell":
+			fmt.Fprintln(cmd.OutOrStdout(), powershell_lazy(completers.Names()))
+		case "tcsh":
+			fmt.Fprintln(cmd.OutOrStdout(), tcsh_lazy(completers.Names()))
+		case "xonsh":
+			fmt.Fprintln(cmd.OutOrStdout(), xonsh_lazy(completers.Names()))
+		case "zsh":
+			fmt.Fprintln(cmd.OutOrStdout(), zsh_lazy(completers.Names()))
+		default:
+			fmt.Fprintln(os.Stderr, "could not determine shell")
+		}
+	}
+
+	spec.Register(rootCmd)
 }
