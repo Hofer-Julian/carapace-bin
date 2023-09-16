@@ -49,6 +49,10 @@ jobs:
       - name: "carapace-lint"
         run: go run ./cmd/carapace-lint completers/*/cmd/*.go
 
+      - name: Install Snapcraft
+        # if: startsWith(github.ref, 'refs/tags/')
+        uses: samuelmeuli/action-snapcraft@v2
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v4
         if: startsWith(github.ref, 'refs/tags/')
