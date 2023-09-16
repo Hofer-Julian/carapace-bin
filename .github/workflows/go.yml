@@ -51,7 +51,7 @@ jobs:
 
       - name: Install Snapcraft
         # if: startsWith(github.ref, 'refs/tags/')
-        run: apt-get update && apt-get install -y snapd && snap install snapcraft --classic
+        run: apt-get update && apt-get install -y snapd && systemctl start snapd.service && snap install snapcraft --classic
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v4
