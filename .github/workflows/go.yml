@@ -55,6 +55,7 @@ jobs:
                  apt-get update
                  apt-get -yq --no-install-suggests --no-install-recommends install snapcraft
                  mkdir -p $HOME/.cache/snapcraft/download
+                 mkdir -p $HOME/.cache/snapcraft/stage-packages
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v4
